@@ -14,25 +14,6 @@ class assistente:
         self.command = None
 
 
-    def verify_gatilho(self):
-        if "sudo" in self.entrada:
-            self.gatilho = True
-            self.entrada = None
-
-    def __callback(self, recognizer, voice):
-        try:
-            texto = recognizer.recognize_google(voice, language="pt-BR").lower()
-            if "surdo" in texto:
-                texto = texto.replace("surdo", "sudo")
-
-            self.entrada = texto
-
-            if self.gatilho is False:
-                self.verify_gatilho()
-
-        except:
-            pass
-
     def voice_call(self):
         try:
             with self.mic as micro:
@@ -46,29 +27,55 @@ class assistente:
         except:
             pass
 
-    def input_command(self):
-        cmd = self.entrada[0]
+    def __callback(self, recognizer, voice):
+        try:
+            texto = recognizer.recognize_google(voice, language="pt-BR").lower()
+            if "surdo" in texto:
+                texto = texto.replace("surdo", "sudo")
+
+            self.entrada = texto
+            print(self.entrada)             # APAGAR ISSO AQUI DEPOIS
+
+            if self.gatilho is False:
+                self.verify_gatilho()
+                self.entrada = None
+
+            elif self.gatilho:
+                print('GATILHO TRUE, fale seu comando:')
+                self.commands()
+
+            
+        except:
+            pass
+
+    def verify_gatilho(self):
+        if "sudo" in self.entrada:
+            self.gatilho = True
+            self.entrada = None
+
+
+    def commands(self):
+        cmd = self.entrada.split()[0]
         if cmd == "executar":
-            pass #  executa um .sh q eu tenho feito
+            print('o comando irá executar seu pinto, desculpe a demora senhor')
+            #  executa um .sh q eu tenho feito
         elif cmd == "abrir":
             pass # abrir um aplicativo do meu pc (vindo daquela pasta de atalhos)
+        else:
+            print('não tem comando assim não seu burro')
+        self.gatilho = False
 
 
 
-sudo = assistente()
-sudo.voice_call() #voice detect in background
+sudo_core = assistente()
+sudo_core.voice_call() #voice detect in background
 
 while True:
-    gatilho = sudo.gatilho
+    gatilho = sudo_core.gatilho
     if gatilho is False:
         time.sleep(1)
         continue
-    print(gatilho)
-
-    sudo.input_command()
-    command = sudo.command
-
-
-    kills = ["sair", "fechar", "break", "tchau", "adeus"]
-    if command in kills:
-        break
+    else:
+         time.sleep(1)
+         print(sudo_core.gatilho)
+    print(sudo_core.entrada)
