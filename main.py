@@ -47,8 +47,11 @@ class assistente:
             pass
 
     def input_command(self):
-        if self.entrada[0] == "executar":
+        cmd = self.entrada[0]
+        if cmd == "executar":
             pass #  executa um .sh q eu tenho feito
+        elif cmd == "abrir":
+            pass # abrir um aplicativo do meu pc (vindo daquela pasta de atalhos)
 
 
 
