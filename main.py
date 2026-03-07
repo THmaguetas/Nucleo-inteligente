@@ -10,14 +10,26 @@ class assistente:
         self.mic = sr.Microphone()
         self.rec = sr.Recognizer()
         self.entrada = None
+        self.gatilho = False
+        self.command = None
 
 
-    def call_back(self, recognizer, voice):
+    def verify_gatilho(self):
+        if "sudo" in self.entrada:
+            self.gatilho = True
+            self.entrada = None
+
+    def __callback(self, recognizer, voice):
         try:
             texto = recognizer.recognize_google(voice, language="pt-BR").lower()
             if "surdo" in texto:
                 texto = texto.replace("surdo", "sudo")
+
             self.entrada = texto
+
+            if self.gatilho is False:
+                self.verify_gatilho()
+
         except:
             pass
 
@@ -29,23 +41,31 @@ class assistente:
             self.rec.pause_threshold = 1.2
             self.rec.non_speaking_duration = 1
             self.rec.dynamic_energy_threshold = True
-            
-            voice = self.rec.listen_in_background(self.mic, self.call_back)
-            return self.entrada
+
+            self.rec.listen_in_background(self.mic, self.__callback)
         except:
-            return None
+            pass
+
+    def input_command(self):
+        if self.entrada[0] == "executar":
+            pass #  executa um .sh q eu tenho feito
 
 
 
-#--------------------------------------------------------------------
-
-var = assistente()
-var.voice_call() #voice detect in background
+sudo = assistente()
+sudo.voice_call() #voice detect in background
 
 while True:
-    if var.entrada:
+    gatilho = sudo.gatilho
+    if gatilho is False:
         time.sleep(1)
-        print(var.entrada)
+        continue
+    print(gatilho)
 
-    if var.entrada in ["sair", "fechar", "break", "tchau", "adeus"]:
+    sudo.input_command()
+    command = sudo.command
+
+
+    kills = ["sair", "fechar", "break", "tchau", "adeus"]
+    if command in kills:
         break
