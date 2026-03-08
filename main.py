@@ -1,17 +1,35 @@
 import speech_recognition as sr
-import os
-import subprocess
 import time
-from dotenv import load_dotenv
-load_dotenv()
+import os
+#from dotenv import load_dotenv
+#load_dotenv()
+from comandos.executar import executar
+from comandos.abrir import abrir
 
 class assistente:
     def __init__(self):
+        # turn on mic
         self.mic = sr.Microphone()
         self.rec = sr.Recognizer()
+
+        # entradas e permissões por fala
         self.entrada = None
         self.gatilho = False
         self.command = None
+
+        # instâncias das funções
+        self.exec = executar()
+        self.open = abrir()
+        self.funçoes = {
+            "executar":{
+                "update": self.exec.update,
+                "clear": self.exec.clear_sys
+            },
+            "abrir" : {
+                "terminal": self.open.kitty
+            },
+            "fechar": self.fechar
+        }
 
 
     def voice_call(self):
@@ -33,34 +51,40 @@ class assistente:
             if "surdo" in texto:
                 texto = texto.replace("surdo", "sudo")
 
-            self.entrada = texto
-            print(self.entrada)             # APAGAR ISSO AQUI DEPOIS
-
             if self.gatilho is False:
-                self.verify_gatilho()
-                self.entrada = None
+                if "sudo" in texto:
+                    self.gatilho = True
+                    print('DIGA SEU COMANDO')
+            else:
+                self.gatilho = False
+                self.entrada = texto
 
-            elif self.gatilho:
-                print('GATILHO TRUE, fale seu comando:')
-                self.commands()
-
-            
-        except:
-            pass
-
-    def verify_gatilho(self):
-        if "sudo" in self.entrada:
-            self.gatilho = True
-            self.entrada = None
+        except Exception as e:
+            print(e)
 
 
     def commands(self):
-        cmd = self.entrada.split()[0]
-        if cmd == "executar":
-            print('o comando irá executar seu pinto, desculpe a demora senhor')
-            #  executa um .sh q eu tenho feito
-        elif cmd == "abrir":
-            pass # abrir um aplicativo do meu pc (vindo daquela pasta de atalhos)
+        func = self.entrada.split()[0]
+        try:
+            cmd = self.entrada.split()[1]
+        except:
+            cmd = None
+            print(F'FUNC É: {func}')     # APAGAR ISSO AQUI DEPOIS
+            print(f'CMD É: {cmd}')           # APAGAR ISSO AQUI DEPOIS
+
+        if func in self.funçoes:
+            if cmd is not None and cmd in self.funçoes[func] :
+                print("func:", func)
+                print("cmd:", cmd)
+                print("tipo:", type(self.funcoes[func][cmd]))
+
+                self.funçoes[func][cmd]()
+                
+            elif cmd is None:
+                self.funçoes[func]()
+
+            else:
+                print('não tem comando assim não seu burro')
         else:
             print('não tem comando assim não seu burro')
         self.gatilho = False
@@ -71,11 +95,8 @@ sudo_core = assistente()
 sudo_core.voice_call() #voice detect in background
 
 while True:
-    gatilho = sudo_core.gatilho
-    if gatilho is False:
-        time.sleep(1)
-        continue
-    else:
-         time.sleep(1)
-         print(sudo_core.gatilho)
-    print(sudo_core.entrada)
+
+    if not sudo_core.awake:
+        break
+
+    time.sleep(0.5)
