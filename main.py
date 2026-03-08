@@ -27,8 +27,7 @@ class assistente:
             },
             "abrir" : {
                 "terminal": self.open.kitty
-            },
-            "fechar": self.fechar
+            }
         }
 
 
@@ -42,8 +41,9 @@ class assistente:
             self.rec.dynamic_energy_threshold = True
 
             self.rec.listen_in_background(self.mic, self.__callback)
-        except:
-            pass
+        except Exception as e:
+            print(e)
+
 
     def __callback(self, recognizer, voice):
         try:
@@ -56,30 +56,29 @@ class assistente:
                     self.gatilho = True
                     print('DIGA SEU COMANDO')
             else:
-                self.gatilho = False
                 self.entrada = texto
+                self.gatilho = False
 
         except Exception as e:
             print(e)
 
 
     def commands(self):
-        func = self.entrada.split()[0]
+        argumento = self.command.split()
+        func = argumento[0]
         try:
-            cmd = self.entrada.split()[1]
+            cmd = argumento[1]
         except:
             cmd = None
-            print(F'FUNC É: {func}')     # APAGAR ISSO AQUI DEPOIS
-            print(f'CMD É: {cmd}')           # APAGAR ISSO AQUI DEPOIS
 
         if func in self.funçoes:
             if cmd is not None and cmd in self.funçoes[func] :
                 print("func:", func)
                 print("cmd:", cmd)
-                print("tipo:", type(self.funcoes[func][cmd]))
+                print("tipo:", type(self.funçoes[func][cmd]))
 
                 self.funçoes[func][cmd]()
-                
+
             elif cmd is None:
                 self.funçoes[func]()
 
@@ -95,8 +94,9 @@ sudo_core = assistente()
 sudo_core.voice_call() #voice detect in background
 
 while True:
-
-    if not sudo_core.awake:
-        break
+    if sudo_core.entrada:
+        sudo_core.command = sudo_core.entrada
+        sudo_core.entrada = None
+        sudo_core.commands()
 
     time.sleep(0.5)
