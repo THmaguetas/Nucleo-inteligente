@@ -12,6 +12,9 @@ class assistente:
         self.mic = sr.Microphone()
         self.rec = sr.Recognizer()
 
+        # pasta local
+        self.atual_dir = os.getcwd()
+
         # entradas e permissões por fala
         self.entrada = None
         self.gatilho = False
@@ -20,7 +23,7 @@ class assistente:
         # instâncias das funções
         self.exec = executar()
         self.open = abrir()
-        self.funçoes = {
+        '''self.funçoes = {
             "executar":{
                 "update": self.exec.update,
                 "clear": self.exec.clear_sys
@@ -28,7 +31,7 @@ class assistente:
             "abrir" : {
                 "terminal": self.open.kitty
             }
-        }
+        }'''
 
 
     def voice_call(self):
@@ -77,7 +80,7 @@ class assistente:
                 print("cmd:", cmd)
                 print("tipo:", type(self.funçoes[func][cmd]))
 
-                self.funçoes[func][cmd]()
+                os.system(f"bash {self.atual_dir}/{func}/{cmd}")
 
             elif cmd is None:
                 self.funçoes[func]()
@@ -88,6 +91,8 @@ class assistente:
             print('não tem comando assim não seu burro')
         self.gatilho = False
 
+    def run_cmd(self,):
+        os.system(f"bash ")
 
 
 sudo_core = assistente()
