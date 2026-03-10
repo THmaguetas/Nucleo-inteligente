@@ -14,8 +14,8 @@ class assistente:
         self.atual_dir = os.getcwd()
 
         # entradas e permissões por fala
-        self.entrada = None
         self.gatilho = False
+        self.entrada =None
         self.command = None
 
 
@@ -51,25 +51,34 @@ class assistente:
             print(e)
 
 
-    def commands(self,):
+    def exec_commands(self,):
         dir_commands = f"{self.atual_dir}/comandos"
+        comando = self.command
 
-        term_one = self.command.split()[0]
-        term_two = self.command.split()[1]
-        try: 
-            term_tree = self.command.split()[2]
-        except:
-            term_tree = None
+        self.__verify_command(cmd=comando)
 
         # acho q se o chosen_cmd for feito dessa forma o aplicativo vai ficar muito engessado e limitado, preciso pensar em uma maneira de deixar isso mais genérico
-        if term_tree is not None:
-            chosen_cmd = f"{dir_commands}/{term_one}/{term_two}/{term_tree}"
+        if len(comando) == 3:
+            chosen_cmd = f"{comando[0]}/{comando[1]}/{comando[2]}"
         else:
-            chosen_cmd = f"{dir_commands}/{term_one}/{term_two}"
-            
+            chosen_cmd = f"{comando[0]}/{comando[1]}"
         print(chosen_cmd)
+
         if True == False:
-            os.system(f"bash  exec {chosen_cmd}")
+            os.system(f"bash  exec {dir_commands}/{chosen_cmd}")
+
+
+    def __verify_command(self, cmd):
+        list_commands = os.listdir(f'{self.atual_dir}/comandos')
+        print( list_commands)
+        
+        if cmd[0] in list_commands:
+            list_params = os.listdir(f'{self.atual_dir}/comandos/{cmd[0]}')
+            print(list_params)
+            if cmd[1] in list_params:
+                return True
+        else:
+            return False
 
 
 
@@ -78,8 +87,8 @@ sudo_core.voice_call() #voice detect in background
 
 while True:
     if sudo_core.entrada:
-        sudo_core.command = sudo_core.entrada
+        sudo_core.command = sudo_core.entrada.split()
         sudo_core.entrada = None
-        sudo_core.commands()
+        sudo_core.exec_commands()
 
     time.sleep(0.5)
