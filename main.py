@@ -3,8 +3,6 @@ import time
 import os
 #from dotenv import load_dotenv
 #load_dotenv()
-from comandos.executar import executar
-from comandos.abrir import abrir
 
 class assistente:
     def __init__(self):
@@ -19,19 +17,6 @@ class assistente:
         self.entrada = None
         self.gatilho = False
         self.command = None
-
-        # instâncias das funções
-        self.exec = executar()
-        self.open = abrir()
-        '''self.funçoes = {
-            "executar":{
-                "update": self.exec.update,
-                "clear": self.exec.clear_sys
-            },
-            "abrir" : {
-                "terminal": self.open.kitty
-            }
-        }'''
 
 
     def voice_call(self):
@@ -66,33 +51,26 @@ class assistente:
             print(e)
 
 
-    def commands(self):
-        argumento = self.command.split()
-        func = argumento[0]
-        try:
-            cmd = argumento[1]
+    def commands(self,):
+        dir_commands = f"{self.atual_dir}/comandos"
+
+        term_one = self.command.split()[0]
+        term_two = self.command.split()[1]
+        try: 
+            term_tree = self.command.split()[2]
         except:
-            cmd = None
+            term_tree = None
 
-        if func in self.funçoes:
-            if cmd is not None and cmd in self.funçoes[func] :
-                print("func:", func)
-                print("cmd:", cmd)
-                print("tipo:", type(self.funçoes[func][cmd]))
-
-                os.system(f"bash {self.atual_dir}/{func}/{cmd}")
-
-            elif cmd is None:
-                self.funçoes[func]()
-
-            else:
-                print('não tem comando assim não seu burro')
+        # acho q se o chosen_cmd for feito dessa forma o aplicativo vai ficar muito engessado e limitado, preciso pensar em uma maneira de deixar isso mais genérico
+        if term_tree is not None:
+            chosen_cmd = f"{dir_commands}/{term_one}/{term_two}/{term_tree}"
         else:
-            print('não tem comando assim não seu burro')
-        self.gatilho = False
+            chosen_cmd = f"{dir_commands}/{term_one}/{term_two}"
+            
+        print(chosen_cmd)
+        if True == False:
+            os.system(f"bash  exec {chosen_cmd}")
 
-    def run_cmd(self,):
-        os.system(f"bash ")
 
 
 sudo_core = assistente()
