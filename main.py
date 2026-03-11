@@ -1,6 +1,7 @@
 import speech_recognition as sr
 import time
 import os
+from subprocess import run
 #from dotenv import load_dotenv
 #load_dotenv()
 
@@ -10,8 +11,8 @@ class assistente:
         self.mic = sr.Microphone()
         self.rec = sr.Recognizer()
 
-        # pasta local
-        self.atual_dir = os.getcwd()
+        # base para toda a ramificação de comandos
+        self.base_cmd_dir = f"{os.getcwd()}/comandos"
 
         # entradas e permissões por fala
         self.gatilho = False
@@ -51,34 +52,23 @@ class assistente:
             print(e)
 
 
-    def exec_commands(self,):
-        dir_commands = f"{self.atual_dir}/comandos"
+    def exec_commands(self):
+        base_commands = self.base_cmd_dir
         comando = self.command
 
-        self.__verify_command(cmd=comando)
+        dir_cmd = os.path.join(base_commands, *comando[:-1])
+        nome_cmd = comando[-1]
 
-        # acho q se o chosen_cmd for feito dessa forma o aplicativo vai ficar muito engessado e limitado, preciso pensar em uma maneira de deixar isso mais genérico
-        if len(comando) == 3:
-            chosen_cmd = f"{comando[0]}/{comando[1]}/{comando[2]}"
+        if os.path.isdir(dir_cmd):
+            for arq in os.listdir(dir_cmd):
+                verify_name = os.path.splitext(arq)[0]
+                type_cmd =  os.path.splitext(arq)[-1]
+
+                if nome_cmd == verify_name:
+                    run([f"{dir_cmd}/{nome_cmd}{type_cmd}"])
+
         else:
-            chosen_cmd = f"{comando[0]}/{comando[1]}"
-        print(chosen_cmd)
-
-        if True == False:
-            os.system(f"bash  exec {dir_commands}/{chosen_cmd}")
-
-
-    def __verify_command(self, cmd):
-        list_commands = os.listdir(f'{self.atual_dir}/comandos')
-        print( list_commands)
-        
-        if cmd[0] in list_commands:
-            list_params = os.listdir(f'{self.atual_dir}/comandos/{cmd[0]}')
-            print(list_params)
-            if cmd[1] in list_params:
-                return True
-        else:
-            return False
+            print("comando não existe")
 
 
 
@@ -90,5 +80,6 @@ while True:
         sudo_core.command = sudo_core.entrada.split()
         sudo_core.entrada = None
         sudo_core.exec_commands()
+        sudo_core.gatilho = False
 
     time.sleep(0.5)
