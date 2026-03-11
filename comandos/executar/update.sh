@@ -1,3 +1,12 @@
 #!/bin/bash
 
-echo "FUNCIONA FILHO DA PUTA"
+sudo dnf autoremove
+sudo dnf clean all
+sudo dnf upgrade -y
+
+flatpak uninstall --unused
+flatpak repair
+flatpak update -y
+
+sudo snap refresh
+rm -rf /var/lib/snapd/cache/*

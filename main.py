@@ -65,10 +65,14 @@ class assistente:
                 type_cmd =  os.path.splitext(arq)[-1]
 
                 if nome_cmd == verify_name:
-                    run([f"{dir_cmd}/{nome_cmd}{type_cmd}"])
+                    try:
+                        run([f"{dir_cmd}/{nome_cmd}{type_cmd}"])
 
+                    except Exception as e:
+                        print(e)
         else:
             print("comando não existe")
+
 
 
 
