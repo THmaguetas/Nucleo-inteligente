@@ -26,8 +26,8 @@ class assistente:
         self.base_cmd_dir = f"{os.getcwd()}/comandos"
 
         # entradas e permissões por fala
-        self.gatilho = True
-        self.entrada = "executar config"
+        self.gatilho = False
+        self.entrada = None
         self.command = None
 
 
@@ -88,7 +88,6 @@ class assistente:
                          return False
         else:
             return False
-
 
 
 
