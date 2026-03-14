@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-
 import speech_recognition as sr
 import time
+from glob import glob
 import os
 from subprocess import run
 #from dotenv import load_dotenv
@@ -29,21 +29,25 @@ class assistente:
         self.base_cmd_dir = f"{os.getcwd()}/comandos"
 
         # entradas e permissões por fala
-        self.gatilho = False
-        self.entrada = None
+        self.gatilho = True
+        self.entrada = "executar config"
         self.command = None
 
 
     def voice_call(self):
         try:
             with self.mic as micro:
-                self.rec.adjust_for_ambient_noise(micro, duration=2)
-            self.rec.energy_threshold = 250
-            self.rec.pause_threshold = 1.2
-            self.rec.non_speaking_duration = 1
+                self.rec.adjust_for_ambient_noise(micro, duration=4)
+            #self.rec.energy_threshold = 250
+            self.rec.pause_threshold = 0.8
+            self.rec.non_speaking_duration = 0.5
             self.rec.dynamic_energy_threshold = True
 
-            self.rec.listen_in_background(self.mic, self.__callback)
+            self.rec.listen_in_background(
+                self.mic,
+                self.__callback,
+                phrase_time_limit=5
+                )
         except Exception:
             confirm_action(False)
 
@@ -70,23 +74,59 @@ class assistente:
         base_commands = self.base_cmd_dir
         comando = self.command
 
-        dir_cmd = os.path.join(base_commands, *comando[:-1])
-        nome_cmd = comando[-1]
+        full_dir_cmd = os.path.join(base_commands, *comando)
+        print('FULL DIR CMD: ', full_dir_cmd)
 
-        if os.path.isdir(dir_cmd):
-            for arq in os.listdir(dir_cmd):
-                verify_name = os.path.splitext(arq)[0]
-                type_cmd =  os.path.splitext(arq)[-1]
+        if os.path.exists(full_dir_cmd):
+            print('diretório existe')
+            true_cmd = next(
+                (f for f in os.path.listdir(dir_cmd) if os.path.isfile(os.path.join(dir_cmd, f)) and os.path.splitext(f)[0] == name_cmd),
+                None
+            )
+            print(true_cmd)
 
-                if nome_cmd == verify_name:
-                    try:
-                        run([f"{dir_cmd}/{nome_cmd}{type_cmd}"])
-                        confirm_action(True)
+            if os.path.isfile(true_cmd):
+                print('diretório é um arquivo')
+                dir_cmd = os.path.join(base_commands, *comando[:-1])
+                name_cmd = comando[-1]
 
-                    except Exception:
-                        confirm_action(False)
+                print(dir_cmd, name_cmd)
+
+                try:
+                    run([f"{dir_cmd}/{true_cmd}"])
+                    return True
+                except Exception as e:
+                    print(e)
+                    return False
+
+
+            elif os.path.isdir(full_dir_cmd):
+                pasta = os.listdir(dir_cmd)
+                if len(pasta) > 0:
+                    arq_correct = None
+                    cont = 0
+                    for arq in pasta:
+                        if os.path.isfile(f"{dir_cmd}/{arq}") and os.access(f"{dir_cmd}/{arq}", os.X_OK):
+                            cont += 1
+                            arq_correct = arq
+                    if cont == 1:
+                        try:
+                            run([f"{dir_cmd}/{arq_correct}"])
+                            return True
+                        except Exception:
+                            return False
+
+            else:
+                return False
+
         else:
-            confirm_action(False)
+            parametro = comando[-1]
+            cmd_full = os.path.join(base_commands, *comando[:-1])
+            try:
+                run([cmd_full, parametro])
+                return True
+            except Exception:
+                return False
 
 
 
@@ -99,9 +139,12 @@ while True:
     if sudo_core.entrada:
         sudo_core.command = sudo_core.entrada.split()
         sudo_core.entrada = None
-        sudo_core.exec_commands()
-        sudo_core.gatilho = False
+        cmd = sudo_core.exec_commands()
 
-    print(sudo_core.command)
+        sudo_core.gatilho = False
+        if cmd == True:
+            confirm_action(True)
+        elif cmd == False:
+            confirm_action(False)
 
     time.sleep(0.5)
