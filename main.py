@@ -1,9 +1,23 @@
+#!/usr/bin/env python3
+
+
 import speech_recognition as sr
 import time
 import os
 from subprocess import run
 #from dotenv import load_dotenv
 #load_dotenv()
+
+def confirm_action(tipo):
+    if tipo == True:
+        os.system("beep -f 3000 -l 30 -r2")
+    elif tipo == False:
+        os.system("beep -f 500 -l 250")
+    elif tipo == 'start':
+        os.system("beep -f 4000 -l 100 -r4")
+    else:
+        pass
+
 
 class assistente:
     def __init__(self):
@@ -16,7 +30,7 @@ class assistente:
 
         # entradas e permissões por fala
         self.gatilho = False
-        self.entrada =None
+        self.entrada = None
         self.command = None
 
 
@@ -30,8 +44,8 @@ class assistente:
             self.rec.dynamic_energy_threshold = True
 
             self.rec.listen_in_background(self.mic, self.__callback)
-        except Exception as e:
-            print(e)
+        except Exception:
+            confirm_action(False)
 
 
     def __callback(self, recognizer, voice):
@@ -43,13 +57,13 @@ class assistente:
             if self.gatilho is False:
                 if "sudo" in texto:
                     self.gatilho = True
-                    print('DIGA SEU COMANDO')
+                    confirm_action(True)
             else:
                 self.entrada = texto
                 self.gatilho = False
 
-        except Exception as e:
-            print(e)
+        except Exception:
+            pass
 
 
     def exec_commands(self):
@@ -67,17 +81,19 @@ class assistente:
                 if nome_cmd == verify_name:
                     try:
                         run([f"{dir_cmd}/{nome_cmd}{type_cmd}"])
+                        confirm_action(True)
 
-                    except Exception as e:
-                        print(e)
+                    except Exception:
+                        confirm_action(False)
         else:
-            print("comando não existe")
+            confirm_action(False)
 
 
 
 
 sudo_core = assistente()
 sudo_core.voice_call() #voice detect in background
+confirm_action('start')
 
 while True:
     if sudo_core.entrada:
@@ -85,5 +101,7 @@ while True:
         sudo_core.entrada = None
         sudo_core.exec_commands()
         sudo_core.gatilho = False
+
+    print(sudo_core.command)
 
     time.sleep(0.5)

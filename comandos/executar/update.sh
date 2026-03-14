@@ -9,4 +9,4 @@ flatpak repair
 flatpak update -y
 
 sudo snap refresh
-rm -rf /var/lib/snapd/cache/*
+sudo rm -rf /var/lib/snapd/cache/*
