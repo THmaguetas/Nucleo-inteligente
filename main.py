@@ -6,9 +6,11 @@ from subprocess import run
 #load_dotenv()
 
 def confirm_action(tipo):
-    if tipo == True:
+    if tipo == 'acept':
         os.system("beep -f 3000 -l 30 -r2")
-    elif tipo == False:
+    elif tipo == 'success':
+        os.system("beep -f 3000 -l 150")        
+    elif tipo == 'error':
         os.system("beep -f 500 -l 250")
     elif tipo == 'start':
         os.system("beep -f 4000 -l 100 -r4")
@@ -46,7 +48,7 @@ class assistente:
                 phrase_time_limit=5
                 )
         except Exception:
-            confirm_action(False)
+            confirm_action('error')
 
 
     def __callback(self, recognizer, voice):
@@ -58,7 +60,7 @@ class assistente:
             if self.gatilho is False:
                 if "sudo" in texto:
                     self.gatilho = True
-                    confirm_action(True)
+                    confirm_action('acept')
             else:
                 self.entrada = texto
                 self.gatilho = False
@@ -82,12 +84,12 @@ class assistente:
                 if nome_cmd == verify_name:
                     try:
                         run([f"{dir_cmd}/{nome_cmd}{type_cmd}"])
-                        return True
+                        return 'success'
 
                     except Exception:
-                         return False
+                         return 'error'
         else:
-            return False
+            return 'error'
 
 
 
@@ -102,9 +104,11 @@ while True:
         cmd = sudo_core.exec_commands()
 
         sudo_core.gatilho = False
-        if cmd == True:
-            confirm_action(True)
-        elif cmd == False:
-            confirm_action(False)
+        if cmd == 'acept':
+            confirm_action( 'acept')
+        elif cmd == 'success':
+            confirm_action('success')
+        elif cmd == 'error':
+            confirm_action('error')
 
     time.sleep(0.5)
