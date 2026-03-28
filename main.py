@@ -1,11 +1,14 @@
-from vosk import Model, KaldiRecognizer
 import speech_recognition as sr
-import json
 import time
+import json
 import os
 from subprocess import run
-#from dotenv import load_dotenv
-#load_dotenv()
+
+# arquivo das config do usuário
+def config():
+    with open("config.json", 'r')as arq:
+        return json.load(arq)
+    
 
 def confirm_action(tipo):
     if tipo == 'acept':
@@ -22,28 +25,21 @@ def confirm_action(tipo):
 
 class assistente:
     def __init__(self):
-        # vosk config 
-        self.model = Model("vosk_model/vosk-model-small-pt-0.3")
-        self.vosk_rec = KaldiRecognizer(self.model, 44100)
+        # config do user
+        user_conf = config()
 
-        # mic config
+        # turn on mic
         self.mic = sr.Microphone()
         self.rec = sr.Recognizer()
-        self.sample_rate = self.mic.SAMPLE_RATE
-
-        with self.mic as micro:
-            self.rec.adjust_for_ambient_noise(micro, duration=4)
-        self.rec.dynamic_energy_threshold = False
-        self.rec.energy_threshold = 200
-
-        # modos de escuta
-        self.recognizer_gatilho = KaldiRecognizer(self.model, self.sample_rate,  '["sudo"]' )
-        self.recognizer_comando = KaldiRecognizer(self.model, self.sample_rate)
 
         # base para toda a ramificação de comandos
-        self.base_cmd_dir = f"{os.getcwd()}/comandos"
+        if user_conf["commands_dir"].lower() == "atual":
+            self.base_cmd_dir = f"{os.getcwd()}/comandos"
+        else:
+            self.base_cmd_dir = f"{user_conf["commands_dir"]}"
 
         # entradas e permissões por fala
+        self.name_gatilho = user_conf["nome_gatilho"]
         self.gatilho = False
         self.entrada = None
         self.command = None
@@ -51,8 +47,11 @@ class assistente:
 
     def voice_call(self):
         try:
+            with self.mic as micro:
+                self.rec.adjust_for_ambient_noise(micro, duration=4)
             self.rec.pause_threshold = 0.8
             self.rec.non_speaking_duration = 0.5
+            self.rec.dynamic_energy_threshold = True
 
             self.rec.listen_in_background(
                 self.mic,
@@ -63,39 +62,19 @@ class assistente:
             confirm_action('error')
 
 
-    def __callback(self, recognizer, voice): # não tenho a menor ideia do porque, mas o código só funciona com o parâmetro "recognizer" escrito, mesmo sem uso.
-        # trata toda a entrada por voz e transforma em texto
+    def __callback(self, recognizer, voice):
         try:
-            data = voice.get_raw_data()
-            if self.vosk_rec.AcceptWaveform(data):
-                result = json.loads(self.vosk_rec.Result())
-                texto = result.get("text", "").lower()
-            else:
-                if self.vosk_rec.AcceptWaveform(data):
-                    result = json.loads(self.vosk_rec.Result())
-                    texto = result.get("text", "").lower()
-                else:
-                    return
-
-            if "surdo" in texto:
+            texto = recognizer.recognize_google(voice, language="pt-BR").lower()
+            if self.name_gatilho in texto:
                 texto = texto.replace("surdo", "sudo")
 
-            print("OUVI:", texto)
-
-            # ativa o gatilho e troca o modo de escuta
-            if not self.gatilho:
-                if "sudo" in texto:
+            if self.gatilho is False:
+                if self.name_gatilho in texto:
                     self.gatilho = True
                     confirm_action('acept')
-                    self.vosk_rec = self.recognizer_comando
-                    self.vosk_rec.Reset()
             else:
                 self.entrada = texto
                 self.gatilho = False
-                self.vosk_rec = self.recognizer_gatilho
-                self.vosk_rec.Reset()
-
-            self.vosk_rec.Reset()
 
         except Exception:
             pass
@@ -113,21 +92,16 @@ class assistente:
                 verify_name = os.path.splitext(arq)[0]
                 type_cmd =  os.path.splitext(arq)[-1]
 
-                print(nome_cmd, verify_name)
                 if nome_cmd == verify_name:
                     try:
                         run([f"{dir_cmd}/{nome_cmd}{type_cmd}"])
-                        print('sucesso')
                         return 'success'
 
-                    except Exception as e:
-                         print(e)
+                    except Exception:
                          return 'error'
             else:
-                print('ERRO: nome_cmd == verify_name não é verdade')
                 return 'error'
         else:
-            print('ERRO: a pasta não existe')
             return 'error'
 
 
