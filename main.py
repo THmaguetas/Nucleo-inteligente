@@ -8,13 +8,13 @@ from subprocess import run
 def config():
     with open("config.json", 'r')as arq:
         return json.load(arq)
-    
+
 
 def confirm_action(tipo):
     if tipo == 'acept':
         os.system("beep -f 3000 -l 30 -r2")
     elif tipo == 'success':
-        os.system("beep -f 3000 -l 150")        
+        os.system("beep -f 3000 -l 150")
     elif tipo == 'error':
         os.system("beep -f 500 -l 250")
     elif tipo == 'start':
@@ -26,22 +26,22 @@ def confirm_action(tipo):
 class assistente:
     def __init__(self):
         # config do user
-        user_conf = config()
+        self.user_conf = config()
 
         # turn on mic
         self.mic = sr.Microphone()
         self.rec = sr.Recognizer()
 
         # base para toda a ramificação de comandos
-        if user_conf["commands_dir"].lower() == "atual":
+        if self.user_conf["commands_dir"].lower() == "atual":
             self.base_cmd_dir = f"{os.getcwd()}/comandos"
         else:
-            self.base_cmd_dir = f"{user_conf["commands_dir"]}"
+            self.base_cmd_dir = f"{self.user_conf["commands_dir"]}"
 
         # entradas e permissões por fala
-        self.name_gatilho = user_conf["nome_gatilho"]
-        self.gatilho = False
-        self.entrada = None
+        self.name_gatilho = self.user_conf["nome_gatilho"]
+        self.gatilho = True
+        self.entrada = "executar update"
         self.command = None
 
 
@@ -65,8 +65,6 @@ class assistente:
     def __callback(self, recognizer, voice):
         try:
             texto = recognizer.recognize_google(voice, language="pt-BR").lower()
-            if self.name_gatilho in texto:
-                texto = texto.replace("surdo", "sudo")
 
             if self.gatilho is False:
                 if self.name_gatilho in texto:
@@ -94,10 +92,11 @@ class assistente:
 
                 if nome_cmd == verify_name:
                     try:
-                        run([f"{dir_cmd}/{nome_cmd}{type_cmd}"])
+                        run(["sudo", "-n", f"{dir_cmd}/{nome_cmd}{type_cmd}"])
                         return 'success'
 
-                    except Exception:
+                    except Exception as e:
+                         print(e)
                          return 'error'
             else:
                 return 'error'
@@ -106,17 +105,18 @@ class assistente:
 
 
 
-sudo_core = assistente()
-sudo_core.voice_call() #voice detect in background
+Core = assistente()
+Core.voice_call() #voice detect in background
 confirm_action('start')
 
 while True:
-    if sudo_core.entrada:
-        sudo_core.command = sudo_core.entrada.split()
-        sudo_core.entrada = None
-        cmd = sudo_core.exec_commands()
+    if Core.entrada:
+        print("ENTRADA:", Core.entrada)
+        Core.command = Core.entrada.split()
+        Core.entrada = None
+        cmd = Core.exec_commands()
 
-        sudo_core.gatilho = False
+        Core.gatilho = False
         if cmd == 'acept':
             confirm_action( 'acept')
         elif cmd == 'success':
