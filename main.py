@@ -34,7 +34,7 @@ class assistente:
 
         # base para toda a ramificação de comandos
         if self.user_conf["commands_dir"].lower() == "atual":
-            self.base_cmd_dir = f"{os.getcwd()}/comandos"
+            self.base_cmd_dir = f"{os.getcwd()}/"
         else:
             self.base_cmd_dir = f"{self.user_conf["commands_dir"]}"
 
