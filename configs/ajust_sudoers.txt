@@ -1,0 +1,2 @@
+sudo visudo
+user ALL=(ALL) NOPASSWD: diretório/dos/comandos

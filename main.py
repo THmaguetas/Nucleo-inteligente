@@ -4,44 +4,29 @@ import json
 import os
 from subprocess import run
 
+from configs import funcs
+
 # arquivo das config do usuário
-def config():
-    with open("config.json", 'r')as arq:
-        return json.load(arq)
-
-
-def confirm_action(tipo):
-    if tipo == 'acept':
-        os.system("beep -f 3000 -l 30 -r2")
-    elif tipo == 'success':
-        os.system("beep -f 3000 -l 150")
-    elif tipo == 'error':
-        os.system("beep -f 500 -l 250")
-    elif tipo == 'start':
-        os.system("beep -f 4000 -l 100 -r4")
-    else:
-        pass
-
+user_conf = funcs.config()
 
 class assistente:
     def __init__(self):
-        # config do user
-        self.user_conf = config()
-
         # turn on mic
         self.mic = sr.Microphone()
         self.rec = sr.Recognizer()
 
         # base para toda a ramificação de comandos
-        if self.user_conf["commands_dir"].lower() == "atual":
-            self.base_cmd_dir = f"{os.getcwd()}/"
+        if user_conf["commands_dir"].lower() == "atual":
+            os.makedirs(f"{os.getcwd()}/comandos", exist_ok=True)
+            self.base_cmd_dir = f"{os.getcwd()}/comandos/"
         else:
-            self.base_cmd_dir = f"{self.user_conf["commands_dir"]}"
+            if user_conf["commands_dir"]:
+                self.base_cmd_dir = f"{user_conf["commands_dir"]}"
 
         # entradas e permissões por fala
-        self.name_gatilho = self.user_conf["nome_gatilho"]
-        self.gatilho = True
-        self.entrada = "executar update"
+        self.name_gatilho = user_conf["nome_gatilho"]
+        self.gatilho = False
+        self.entrada = None
         self.command = None
 
 
@@ -59,7 +44,7 @@ class assistente:
                 phrase_time_limit=5
                 )
         except Exception:
-            confirm_action('error')
+            funcs.confirm_action('error')
 
 
     def __callback(self, recognizer, voice):
@@ -69,7 +54,7 @@ class assistente:
             if self.gatilho is False:
                 if self.name_gatilho in texto:
                     self.gatilho = True
-                    confirm_action('acept')
+                    funcs.confirm_action('acept')
             else:
                 self.entrada = texto
                 self.gatilho = False
@@ -107,7 +92,7 @@ class assistente:
 
 Core = assistente()
 Core.voice_call() #voice detect in background
-confirm_action('start')
+funcs.confirm_action('start')
 
 while True:
     if Core.entrada:
@@ -118,10 +103,10 @@ while True:
 
         Core.gatilho = False
         if cmd == 'acept':
-            confirm_action( 'acept')
+            funcs.confirm_action( 'acept')
         elif cmd == 'success':
-            confirm_action('success')
+            funcs.confirm_action('success')
         elif cmd == 'error':
-            confirm_action('error')
+            funcs.confirm_action('error')
 
     time.sleep(0.5)
