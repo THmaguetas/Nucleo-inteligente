@@ -1,14 +1,20 @@
 # 🤖 Núcleo Inteligente
 
 --- 
-# 📖 Sobre
-Esse projeto é um assistente virtual responsivo por voz. Ele reage a uma palavra chave, permitindo que, após a detecção dessa palavra, o usuário possa ativar um comando qualquer, feito por ele mesmo, pensando em automação de tarefas.
+## 📖 Sobre
+Esse projeto é um assistente virtual responsivo por voz, usando a biblioteca `speech_recognition` para o reconhecimento de voz . A fala, após a ativação de uma palavra gatilho, será usada para executar comandos específicos feitos completamente pelo próprio usuário. 
 
-Os comandos são códigos de qualquer tipo (.sh, .py, .js ...), feitos pelo próprio usuário.
+Os comandos podem ser códigos de qualquer tipo (.sh, .py, .js e etc...)
 
-A árvore de comandos é completamente personalizável por ele próprio, tendo como limitação duas coisas: cada pasta e arquivo não pode ter mais de uma palavra no nome, e os códigos rodados não poderão conter parâmetros, ex: bash ./código.sh parâmetro1. Isso acontece pois cada palavra antes do último termo é considerada uma pasta, e o último é considerado o script que será executado.
+A árvore de comandos é completamente personalizável pelo próprio usuário, basta ser inserido o diretório raiz dos comandos no arquivo de config.
+
+## ⚙️ Funcionamento
+ Após ativação da palavra gatilho:
+- Entrada exemplo: "executar pc update"
+- Saída exemplo: "/diretório_raiz/executar/pc/update.tipo"
+
+Essa saída será executada, e o programa do usuário rodará.
 
 ---
 # 📌 Status do projeto
-
-🚧 Em desenvolvimento, etapa alpha
+🚧 Em desenvolvimento, etapa alpha.
