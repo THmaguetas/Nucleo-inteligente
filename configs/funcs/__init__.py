@@ -2,8 +2,21 @@ import os
 import json
 
 # arquivo das config do usuário
-def config():
-    with open("config.json", 'r')as arq:
+def config(dir):
+    os.makedirs(dir, exist_ok=True)
+
+    arquivo = f"{dir}/config.json"
+    default_config = {
+        "nome_gatilho": "pitaya",
+        "commands_dir": "atual"
+    }
+
+    if not os.path.exists(arquivo):
+        with open(arquivo, 'w') as arq:
+            json.dump(default_config, arq)
+        return default_config 
+
+    with open(arquivo, 'r') as arq:
         return json.load(arq)
 
 

@@ -7,7 +7,7 @@ from subprocess import run
 from configs import funcs
 
 # arquivo das config do usuário
-user_conf = funcs.config()
+user_conf = funcs.config(dir="/home/th/.config/nuc_assist") # o diretório pode ser alterado (apenas diretórios absolutos)
 
 class assistente:
     def __init__(self):
