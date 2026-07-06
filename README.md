@@ -1,4 +1,4 @@
-# 🤖 Núcleo Inteligente
+# 🤖 **Voice Executor**
 
 --- 
 ## 📖 Sobre
@@ -17,4 +17,4 @@ Essa saída será executada, e o programa do usuário rodará.
 
 ---
 # 📌 Status do projeto
-🚧 Em desenvolvimento, etapa alpha.
+🚧 desenvolvimento pausado, etapa alpha.
